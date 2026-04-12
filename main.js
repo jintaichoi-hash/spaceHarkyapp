@@ -11,7 +11,28 @@ const startButton = document.getElementById('start-button');
 const gameOverOverlay = document.getElementById('game-over-overlay');
 const gameOverMessage = document.getElementById('game-over-message');
 const restartButton = document.getElementById('restart-button');
+const themeToggle = document.getElementById('theme-toggle');
 
+let rinkLineColor = 'rgba(255, 255, 255, 0.3)';
+
+function updateThemeColors() {
+    const isLight = document.body.classList.contains('light-mode');
+    rinkLineColor = isLight ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.3)';
+    themeToggle.textContent = isLight ? 'DARK MODE' : 'LIGHT MODE';
+}
+
+// Initial theme setup
+if (localStorage.getItem('theme') === 'light') {
+    document.body.classList.add('light-mode');
+    updateThemeColors();
+}
+
+themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
+    const isLight = document.body.classList.contains('light-mode');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    updateThemeColors();
+});
 
 let playerScore = 0;
 let aiScore = 0;
@@ -253,7 +274,7 @@ function gameLoop() {
 
 // --- DRAWING ---
 function drawRink() {
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.strokeStyle = rinkLineColor;
     ctx.lineWidth = 2;
 
     // Center line
