@@ -10,24 +10,108 @@
   <link href='/style.css' rel='stylesheet'>
 </head>
 <body>
-  <button id="theme-toggle">LIGHT MODE</button>
-  <div id="game-container">
-    <div id="start-overlay" class="overlay">
-      <h1>ICE HOCKEY</h1>
-      <button id="start-button">START GAME</button>
+  <header>
+    <div class="header-container">
+      <h1>Harky Hockey</h1>
+      <nav>
+        <a href="#game-section">Play</a>
+        <a href="#how-to-play">How to Play</a>
+        <a href="#about">About</a>
+        <button id="theme-toggle">LIGHT MODE</button>
+      </nav>
     </div>
-    <div id="game-over-overlay" class="overlay hidden">
-      <h1 id="game-over-message"></h1>
-      <button id="restart-button">RESTART</button>
+  </header>
+
+  <main>
+    <section id="game-section">
+      <div id="game-container">
+        <div id="start-overlay" class="overlay">
+          <h1>ICE HOCKEY</h1>
+          <button id="start-button">START GAME</button>
+        </div>
+        <div id="game-over-overlay" class="overlay hidden">
+          <h1 id="game-over-message"></h1>
+          <button id="restart-button">RESTART</button>
+        </div>
+        <div class="scoreboard">
+          <div id="player-score">0</div>
+          <div id="ai-score">0</div>
+        </div>
+        <div id="timer-display">02:00</div>
+        <div id="goal-notification" class="hidden">GOAL!</div>
+        <canvas id="game-canvas"></canvas>
+      </div>
+    </section>
+
+    <section id="how-to-play" class="content-section">
+      <h2>How to Play</h2>
+      <div class="content-grid">
+        <div class="content-card">
+          <h3>Controls</h3>
+          <p>Use your <strong>mouse</strong> or <strong>touch</strong> to move your paddle. You can only move on your side of the rink.</p>
+        </div>
+        <div class="content-card">
+          <h3>Objective</h3>
+          <p>Score <strong>5 goals</strong> before the AI or before the timer runs out! Hit the puck with your paddle to send it toward the opponent's goal.</p>
+        </div>
+        <div class="content-card">
+          <h3>Rules</h3>
+          <p>The game lasts for 3 minutes. If time runs out and you haven't scored 5 goals, the AI wins. Good luck!</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="content-section">
+      <h2>About Harky Hockey</h2>
+      <p>Harky Hockey is a fast-paced, arcade-style ice hockey game built with modern web technologies. Our goal is to provide a smooth, responsive, and fun gaming experience directly in your browser without any downloads required.</p>
+      <p>Whether you're looking for a quick break or a challenging match against our AI, Harky Hockey offers an engaging way to test your reflexes and strategy.</p>
+    </section>
+
+    <section id="policy" class="content-section">
+      <h2>Policies</h2>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('privacy')">Privacy Policy</button>
+        <button class="tab-btn" onclick="showTab('terms')">Terms of Service</button>
+      </div>
+      <div id="privacy" class="tab-content active">
+        <h3>Privacy Policy</h3>
+        <p>At Harky Hockey, we value your privacy. This policy explains how we handle your data:</p>
+        <ul>
+          <li><strong>Information Collection:</strong> We do not collect any personal identification information (PII) from our users.</li>
+          <li><strong>Cookies:</strong> We use local storage to remember your theme preference (Dark/Light mode). We do not use tracking cookies for personal profiling.</li>
+          <li><strong>Third-party Services:</strong> We use Google AdSense to serve ads. Google may use cookies to serve ads based on your prior visits to this or other websites.</li>
+        </ul>
+      </div>
+      <div id="terms" class="tab-content">
+        <h3>Terms of Service</h3>
+        <p>By using Harky Hockey, you agree to the following terms:</p>
+        <ul>
+          <li><strong>Usage:</strong> This game is for personal, non-commercial use only.</li>
+          <li><strong>Disclaimer:</strong> The game is provided "as is" without any warranties. We are not responsible for any data loss or issues arising from use.</li>
+          <li><strong>Modifications:</strong> We reserve the right to update the game or these terms at any time.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-container">
+      <p>&copy; 2026 Harky Hockey. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#privacy">Privacy</a>
+        <a href="#terms">Terms</a>
+      </div>
     </div>
-    <div class="scoreboard">
-      <div id="player-score">0</div>
-      <div id="ai-score">0</div>
-    </div>
-    <div id="timer-display">02:00</div>
-    <div id="goal-notification" class="hidden">GOAL!</div>
-    <canvas id="game-canvas"></canvas>
-  </div>
+  </footer>
+
+  <script>
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+  </script>
   <script defer type="text/javascript" src="/main.js"></script>
 </body>
 </html>
