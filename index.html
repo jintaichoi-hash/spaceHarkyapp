@@ -3,12 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
+  <title>Ice Hockey Game</title>
   <link href='/style.css' rel='stylesheet'>
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
+  <div id="game-container">
+    <div id="start-overlay" class="overlay">
+      <h1>ICE HOCKEY</h1>
+      <button id="start-button">START GAME</button>
+    </div>
+    <div id="game-over-overlay" class="overlay hidden">
+      <h1 id="game-over-message"></h1>
+      <button id="restart-button">RESTART</button>
+    </div>
+    <div class="scoreboard">
+      <div id="player-score">0</div>
+      <div id="ai-score">0</div>
+    </div>
+    <div id="timer-display">02:00</div>
+    <div id="goal-notification" class="hidden">GOAL!</div>
+    <canvas id="game-canvas"></canvas>
+  </div>
   <script defer type="text/javascript" src="/main.js"></script>
 </body>
 </html>
