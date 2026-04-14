@@ -121,9 +121,11 @@ const ai = new Paddle((rinkWidth * 3) / 4, rinkHeight / 2, 25, '#f0f');
 const puck = new Puck(rinkWidth / 2, rinkHeight / 2, 15, '#f00');
 const puck2 = new Puck(rinkWidth / 2, rinkHeight / 2, 15, '#f00');
 
-const playerGoalWidth = 140;
+const playerGoalWidth = 80;
 const aiGoalWidth = 80;
 const goalDepth = 15;
+const cornerRadius = 50; // Radius of corner repulsors
+const cornerRepulsion = 3.0; // Repulsion multiplier
 
 // --- PHYSICS & COLLISION ---
 function handleCollisions() {
@@ -138,7 +140,52 @@ function handleCollisions() {
 }
 
 function handlePuckCollisions(puck) {
-    // Puck and Walls
+    // Corner Repulsors Collision
+    const corners = [
+        { x: 0, y: 0 },
+        { x: rinkWidth, y: 0 },
+        { x: 0, y: rinkHeight },
+        { x: rinkWidth, y: rinkHeight }
+    ];
+
+    corners.forEach(corner => {
+        const dx = puck.x - corner.x;
+        const dy = puck.y - corner.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const minDist = cornerRadius + puck.radius;
+
+        if (dist < minDist) {
+            // Repulsion logic
+            const angle = Math.atan2(dy, dx);
+            const overlap = minDist - dist;
+            
+            // Move puck out of repulsor
+            puck.x += Math.cos(angle) * overlap;
+            puck.y += Math.sin(angle) * overlap;
+
+            // Reflect and boost velocity
+            // Vector from corner to puck is the normal
+            const normalX = dx / dist;
+            const normalY = dy / dist;
+            
+            // Dot product of velocity and normal
+            const dot = puck.vx * normalX + puck.vy * normalY;
+            
+            // Reflect: v = v - 2 * (v . n) * n
+            puck.vx = (puck.vx - 2 * dot * normalX) * cornerRepulsion;
+            puck.vy = (puck.vy - 2 * dot * normalY) * cornerRepulsion;
+
+            // Cap maximum speed to prevent it from going crazy
+            const speed = Math.sqrt(puck.vx * puck.vx + puck.vy * puck.vy);
+            const maxSpeed = 25;
+            if (speed > maxSpeed) {
+                puck.vx = (puck.vx / speed) * maxSpeed;
+                puck.vy = (puck.vy / speed) * maxSpeed;
+            }
+        }
+    });
+
+    // Puck and Walls (standard logic after corner check)
     if (puck.y - puck.radius < 0) {
         puck.y = puck.radius;
         puck.vy *= -0.95;
@@ -150,31 +197,23 @@ function handlePuckCollisions(puck) {
     if (puck.x - puck.radius < 0 || puck.x + puck.radius > rinkWidth) {
         // Goal detection
         if (puck.x < rinkWidth/2) {
-            // Left side (Player\'s goal)
+            // Left side (Player's goal)
             if (puck.y > rinkHeight/2 - playerGoalWidth/2 && puck.y < rinkHeight/2 + playerGoalWidth/2) {
                 aiScore++;
                 aiScoreEl.textContent = aiScore;
                 showGoalNotification();
-                if (aiScore >= 5) {
-                    endGame("AI Wins!");
-                } else {
-                    resetPucks();
-                }
+                resetPucks();
             } else {
                 puck.x = puck.radius;
                 puck.vx *= -0.95;
             }
         } else {
-            // Right side (AI\'s goal)
+            // Right side (AI's goal)
             if (puck.y > rinkHeight/2 - aiGoalWidth/2 && puck.y < rinkHeight/2 + aiGoalWidth/2) {
                 playerScore++;
                 playerScoreEl.textContent = playerScore;
                 showGoalNotification();
-                if (playerScore >= 5) {
-                    endGame("You Win!");
-                } else {
-                    resetPucks();
-                }
+                resetPucks();
             } else {
                 puck.x = rinkWidth - puck.radius;
                 puck.vx *= -0.95;
@@ -287,6 +326,28 @@ function drawRink() {
     ctx.beginPath();
     ctx.arc(rinkWidth / 2, rinkHeight / 2, 60, 0, Math.PI * 2);
     ctx.stroke();
+
+    // Corner Repulsors
+    ctx.strokeStyle = '#ff0'; // Yellow color for repulsors
+    ctx.lineWidth = 3;
+    const drawCorners = [
+        { x: 0, y: 0 },
+        { x: rinkWidth, y: 0 },
+        { x: 0, y: rinkHeight },
+        { x: rinkWidth, y: rinkHeight }
+    ];
+    drawCorners.forEach(c => {
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, cornerRadius, 0, Math.PI * 2);
+        ctx.stroke();
+        // Add a glow effect
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#ff0';
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+    });
+    ctx.strokeStyle = rinkLineColor; // Reset color
+    ctx.lineWidth = 2;
     
     // Crease circles
     ctx.beginPath();
@@ -350,9 +411,15 @@ function startTimer() {
             
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
-                if (playerScore < 5) {
-                    endGame("GAME OVER! Time Out - AI Wins!");
+                let resultMessage = "";
+                if (playerScore > aiScore) {
+                    resultMessage = `You Win! ${playerScore} - ${aiScore}`;
+                } else if (aiScore > playerScore) {
+                    resultMessage = `AI Wins! ${aiScore} - ${playerScore}`;
+                } else {
+                    resultMessage = `It's a Draw! ${playerScore} - ${aiScore}`;
                 }
+                endGame(resultMessage);
             }
         }
     }, 1000);
