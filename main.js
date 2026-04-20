@@ -1,6 +1,4 @@
-// [업그레이드] Teachable Machine 모델 URL
 const MODEL_URL = "https://teachablemachine.withgoogle.com/models/xgYVlX_uw/";
-
 let model, webcam, maxPredictions, isWebcamRunning = false;
 
 // DOM Elements
@@ -24,8 +22,12 @@ const langSelect = document.getElementById('lang-select');
 // --- i18n Translations ---
 const translations = {
     ko: {
+        "nav-home": "홈",
+        "nav-test": "테스트",
+        "nav-info": "정보",
+        "nav-privacy": "개인정보처리방침",
         "main-title": "🧑‍🦲 대머리 관상 분석 PRO 👨‍🦱",
-        "main-desc": "실시간 웹캠 또는 사진 업로드로 당신의 풍성함을 확인하세요!",
+        "main-desc": "AI가 당신의 두피 관상을 분석하여 미래를 예측해 드립니다.",
         "btn-webcam": "🎥 실시간 웹캠",
         "btn-upload": "📸 사진 업로드",
         "upload-title": "사진 선택 또는 드래그",
@@ -33,14 +35,23 @@ const translations = {
         "btn-retry": "다시 하기",
         "footer-text": "💡 사진은 저장되지 않으니 안심하세요!",
         "result-title": "분석 결과",
+        "info-title": "관상학으로 보는 대머리",
+        "info-p1": "관상학에서 이마는 하늘의 기운을 받는 곳으로, 넓고 빛나는 이마는 대개 총명함과 리더십을 상징합니다. 본 테스트는 AI 기술을 통해 이러한 전통적 관상 해석과 현대적 데이터를 결합하여 재미있는 결과를 제공합니다.",
+        "info-h3": "풍성한 기운을 유지하는 법",
+        "info-list": "<li>규칙적인 두피 마사지로 혈액순환 돕기</li><li>단백질이 풍부한 식단 유지</li><li>스트레스 관리와 충분한 수면</li>",
+        "privacy-text": "본 사이트는 사용자의 카메라 및 사진 데이터를 분석 목적으로만 사용하며, 어떠한 서버에도 저장하거나 외부에 공유하지 않습니다. 모든 분석은 사용자의 브라우저 내에서 로컬로 이루어집니다.",
         "Bald": "대머리",
         "Normal": "풍성함",
         "대머리": "대머리",
         "대머리 아님": "풍성함"
     },
     en: {
+        "nav-home": "Home",
+        "nav-test": "Test",
+        "nav-info": "Info",
+        "nav-privacy": "Privacy",
         "main-title": "🧑‍🦲 Baldness Analysis PRO 👨‍🦱",
-        "main-desc": "Check your status with live webcam or photo upload!",
+        "main-desc": "AI predicts your future by analyzing your scalp physiognomy.",
         "btn-webcam": "🎥 Live Webcam",
         "btn-upload": "📸 Photo Upload",
         "upload-title": "Select or Drag Photo",
@@ -48,29 +59,47 @@ const translations = {
         "btn-retry": "Try Again",
         "footer-text": "💡 Photos are not saved, don't worry!",
         "result-title": "Analysis Result",
+        "info-title": "Physiognomy of Baldness",
+        "info-p1": "In physiognomy, the forehead is where heavenly energy is received. A broad, shining forehead usually symbolizes intelligence and leadership.",
+        "info-h3": "How to Keep Full Hair",
+        "info-list": "<li>Scalp massage for blood circulation</li><li>High-protein diet</li><li>Stress management and enough sleep</li>",
+        "privacy-text": "This site uses camera and photo data for analysis only. We do not store or share data. All analysis is done locally in your browser.",
         "Bald": "Bald",
         "Normal": "Full Hair",
         "대머리": "Bald",
         "대머리 아님": "Full Hair"
     },
     ja: {
+        "nav-home": "ホーム",
+        "nav-test": "テスト",
+        "nav-info": "情報",
+        "nav-privacy": "プライバシー",
         "main-title": "🧑‍🦲 ハゲ相占い PRO 👨‍🦱",
-        "main-desc": "リアルタイムカメラや写真アップロードで髪の状態を確認しましょう！",
+        "main-desc": "AIがあなたの髪の状態を分析し、未来を予測します。",
         "btn-webcam": "🎥 リアルタイムカメラ",
-        "btn-upload": "📸 사진 업로드",
-        "upload-title": "写真を選択またはドラッグ",
+        "btn-upload": "📸 写真アップ로드",
+        "upload-title": "사진 선택 또는 드래그",
         "loading-text": "AIモデル起動中...",
         "btn-retry": "もう一度行う",
         "footer-text": "💡 写真は保存されませんのでご安心ください！",
         "result-title": "分析結果",
+        "info-title": "ハゲの観相学",
+        "info-p1": "観相学において額は天の気を受ける場所であり、広く輝く額は知性とリーダーシップを象徴します。",
+        "info-h3": "フサフサな髪を保つ方法",
+        "info-list": "<li>頭皮マッサージで血行促進</li><li>高タンパクな食事</li><li>ストレス管理と十分な睡眠</li>",
+        "privacy-text": "当サイトは分析目的のみでカメラデータを使用し、保存や共有は一切行いません。すべてローカルで処理されます。",
         "Bald": "ハゲ",
         "Normal": "フサフサ",
         "대머리": "ハゲ",
-        "대머리 아님": "フサフサ"
+        "대머리 아님": "フサ프사"
     },
     zh: {
+        "nav-home": "首页",
+        "nav-test": "测试",
+        "nav-info": "信息",
+        "nav-privacy": "隐私政策",
         "main-title": "🧑‍🦲 秃头面相分析 PRO 👨‍🦱",
-        "main-desc": "通过实时摄像头或照片上传检查您的头发状况！",
+        "main-desc": "AI 通过分析您的头皮面相来预测未来。",
         "btn-webcam": "🎥 实时摄像头",
         "btn-upload": "📸 上传照片",
         "upload-title": "选择或拖拽照片",
@@ -78,6 +107,11 @@ const translations = {
         "btn-retry": "再试一次",
         "footer-text": "💡 照片不会被保存，请放心！",
         "result-title": "分析结果",
+        "info-title": "秃头的面相学",
+        "info-p1": "在面相学中，额头是接受上天之气的地方，宽阔明亮的额头通常象征着聪明和领导力。",
+        "info-h3": "保持头发浓密的方法",
+        "info-list": "<li>按摩头皮促进血液循环</li><li>保持高蛋白饮食</li><li>压力管理和充足睡眠</li>",
+        "privacy-text": "本站仅将相机数据用于分析，不进行任何存储或共享。所有处理均在本地完成。",
         "Bald": "秃头",
         "Normal": "头发浓密",
         "대머리": "秃头",
@@ -133,12 +167,11 @@ async function startWebcam() {
     resultSection.classList.add('hidden');
 
     if (!webcam) {
-        // [업그레이드] 사용자 제공 로직 반영: flip=true, size=200~300
         const flip = true;
         webcam = new tmImage.Webcam(300, 300, flip); 
         await webcam.setup();
         await webcam.play();
-        webcamContainer.innerHTML = ''; // 초기화
+        webcamContainer.innerHTML = '';
         webcamContainer.appendChild(webcam.canvas);
         window.requestAnimationFrame(webcamLoop);
     }
