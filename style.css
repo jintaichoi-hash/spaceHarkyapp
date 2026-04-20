@@ -42,7 +42,7 @@ body {
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  padding-top: 80px; /* Nav Height */
+  padding-top: 80px;
 }
 
 /* Navigation */
@@ -85,10 +85,6 @@ body {
   color: var(--text-color);
   font-weight: bold;
   font-size: 0.9rem;
-}
-
-.nav-menu a:hover {
-  color: var(--primary-hover);
 }
 
 /* Controls */
@@ -139,12 +135,6 @@ body {
   margin-bottom: 10px;
 }
 
-.app-header p {
-  font-size: 0.9rem;
-  margin-bottom: 30px;
-  color: var(--text-muted);
-}
-
 /* Ad Slots */
 .ad-slot {
   width: 100%;
@@ -157,47 +147,60 @@ body {
   align-items: center;
 }
 
-/* Content Sections */
-.info-content, .privacy-section {
-  text-align: left;
-  margin-top: 40px;
-  padding-top: 30px;
-  border-top: 2px solid var(--border-color);
-}
-
-.info-content h2, .privacy-section h2 {
-  font-size: 1.3rem;
-  margin-bottom: 15px;
-  color: var(--primary-hover);
-}
-
-.info-content p, .privacy-section p {
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: var(--text-color);
-  margin-bottom: 15px;
-}
-
-.info-content ul {
-  list-style: inside circle;
-  font-size: 0.9rem;
-}
-
-/* Mode Buttons & Components (Same as before) */
+/* Mode Buttons */
 .mode-selection { display: flex; gap: 10px; margin-bottom: 25px; }
 .mode-btn { flex: 1; padding: 12px; border-radius: 15px; border: none; background: var(--primary-color); color: white; font-family: 'Jua'; cursor: pointer; }
-.image-preview-box { width: 100%; aspect-ratio: 1/1; max-width: 300px; margin: 0 auto 20px; border-radius: 20px; overflow: hidden; border: 5px solid var(--secondary-color); background: #000; }
+
+/* [중요] 스마트폰에서 꽉 차게 보이도록 수정된 프리뷰 박스 */
+.image-preview-box {
+  width: 100%;
+  aspect-ratio: 1/1;
+  max-width: 400px; /* 크기를 기존 300px에서 400px로 확대 */
+  margin: 0 auto 20px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 5px solid var(--secondary-color);
+  background: #000;
+  position: relative;
+}
+
+.image-preview-box video, 
+.image-preview-box canvas, 
+#image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 이미지가 잘리지 않고 꽉 차게 설정 */
+}
+
+/* Results & Bars */
 .bars-container { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
 .result-bar-wrapper { text-align: left; }
-.label-info { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; }
-.bar-bg { width: 100%; background: var(--border-color); height: 10px; border-radius: 5px; overflow: hidden; }
-.bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary-color), var(--accent-color)); width: 0%; transition: width 0.5s; }
-.retry-btn { width: 100%; padding: 15px; border-radius: 15px; border: none; background: var(--primary-color); color: white; font-family: 'Jua'; font-size: 1.1rem; cursor: pointer; }
-.hidden { display: none !important; }
-.app-footer { margin-top: 40px; font-size: 0.8rem; color: var(--text-muted); }
+.label-info { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; margin-bottom: 5px; }
+.bar-bg { width: 100%; background: var(--border-color); height: 14px; border-radius: 7px; overflow: hidden; }
+.bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary-color), var(--accent-color)); width: 0%; transition: width 0.5s ease-out; }
 
-@media (max-width: 600px) {
-    .nav-logo { font-size: 1.2rem; }
+/* Sections */
+.upload-box { border: 3px dashed var(--primary-color); padding: 40px; border-radius: 20px; cursor: pointer; background: var(--bg-color); }
+.retry-btn { width: 100%; padding: 15px; border-radius: 15px; border: none; background: var(--primary-color); color: white; font-family: 'Jua'; font-size: 1.1rem; cursor: pointer; }
+.info-content, .privacy-section { text-align: left; margin-top: 40px; padding-top: 30px; border-top: 2px solid var(--border-color); }
+.hidden { display: none !important; }
+.app-footer { margin-top: 40px; font-size: 0.8rem; color: var(--text-muted); padding-bottom: 20px; }
+
+/* 모바일 대응 (반응형) */
+@media (max-width: 500px) {
+    body { padding-top: 60px; }
+    .app-container { 
+        padding: 30px 15px; 
+        border-radius: 0; /* 모바일에서 꽉 차게 보이도록 라운딩 제거 선택 가능 */
+        border-left: none;
+        border-right: none;
+        max-width: 100%;
+    }
+    .image-preview-box {
+        max-width: 100%; /* 모바일에서 가로폭을 100%로 설정 */
+        border-radius: 10px;
+    }
+    .nav-logo { font-size: 1.1rem; }
     .nav-menu { gap: 10px; }
     .nav-menu a { font-size: 0.8rem; }
 }
