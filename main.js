@@ -1,494 +1,220 @@
+// [업그레이드] Teachable Machine 모델 URL
+const MODEL_URL = "https://teachablemachine.withgoogle.com/models/xgYVlX_uw/";
 
-const canvas = document.getElementById('game-canvas');
-const ctx = canvas.getContext('2d');
+let model, webcam, maxPredictions, isWebcamRunning = false;
 
-const playerScoreEl = document.getElementById('player-score');
-const aiScoreEl = document.getElementById('ai-score');
-const goalNotification = document.getElementById('goal-notification');
-const timerDisplay = document.getElementById('timer-display');
-const startOverlay = document.getElementById('start-overlay');
-const startButton = document.getElementById('start-button');
-const gameOverOverlay = document.getElementById('game-over-overlay');
-const gameOverMessage = document.getElementById('game-over-message');
-const restartButton = document.getElementById('restart-button');
-const themeToggle = document.getElementById('theme-toggle');
+// DOM Elements
+const uploadSection = document.getElementById('upload-section');
+const webcamSection = document.getElementById('webcam-section');
+const loadingSection = document.getElementById('loading-section');
+const resultSection = document.getElementById('result-section');
+const imageUpload = document.getElementById('image-upload');
+const webcamContainer = document.getElementById('webcam-container');
+const webcamLabelContainer = document.getElementById('webcam-label-container');
+const labelContainer = document.getElementById('label-container');
+const dominantResult = document.getElementById('dominant-result');
+const imagePreview = document.getElementById('image-preview');
 
-let rinkLineColor = 'rgba(255, 255, 255, 0.3)';
+// Buttons
+const useWebcamBtn = document.getElementById('use-webcam-btn');
+const useUploadBtn = document.getElementById('use-upload-btn');
+const retryBtn = document.getElementById('retry-btn');
+const langSelect = document.getElementById('lang-select');
 
-function updateThemeColors() {
-    const isLight = document.body.classList.contains('light-mode');
-    rinkLineColor = isLight ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.3)';
-    themeToggle.textContent = isLight ? 'DARK MODE' : 'LIGHT MODE';
+// --- i18n Translations ---
+const translations = {
+    ko: {
+        "main-title": "🧑‍🦲 대머리 관상 분석 PRO 👨‍🦱",
+        "main-desc": "실시간 웹캠 또는 사진 업로드로 당신의 풍성함을 확인하세요!",
+        "btn-webcam": "🎥 실시간 웹캠",
+        "btn-upload": "📸 사진 업로드",
+        "upload-title": "사진 선택 또는 드래그",
+        "loading-text": "관상 분석 모델 가동 중...",
+        "btn-retry": "다시 하기",
+        "footer-text": "💡 사진은 저장되지 않으니 안심하세요!",
+        "result-title": "분석 결과",
+        "Bald": "대머리",
+        "Normal": "풍성함",
+        "대머리": "대머리",
+        "대머리 아님": "풍성함"
+    },
+    en: {
+        "main-title": "🧑‍🦲 Baldness Analysis PRO 👨‍🦱",
+        "main-desc": "Check your status with live webcam or photo upload!",
+        "btn-webcam": "🎥 Live Webcam",
+        "btn-upload": "📸 Photo Upload",
+        "upload-title": "Select or Drag Photo",
+        "loading-text": "AI Model Loading...",
+        "btn-retry": "Try Again",
+        "footer-text": "💡 Photos are not saved, don't worry!",
+        "result-title": "Analysis Result",
+        "Bald": "Bald",
+        "Normal": "Full Hair",
+        "대머리": "Bald",
+        "대머리 아님": "Full Hair"
+    },
+    ja: {
+        "main-title": "🧑‍🦲 ハゲ相占い PRO 👨‍🦱",
+        "main-desc": "リアルタイムカメラや写真アップロードで髪の状態を確認しましょう！",
+        "btn-webcam": "🎥 リアルタイムカメラ",
+        "btn-upload": "📸 사진 업로드",
+        "upload-title": "写真を選択またはドラッグ",
+        "loading-text": "AIモデル起動中...",
+        "btn-retry": "もう一度行う",
+        "footer-text": "💡 写真は保存されませんのでご安心ください！",
+        "result-title": "分析結果",
+        "Bald": "ハゲ",
+        "Normal": "フサフサ",
+        "대머리": "ハゲ",
+        "대머리 아님": "フサフサ"
+    },
+    zh: {
+        "main-title": "🧑‍🦲 秃头面相分析 PRO 👨‍🦱",
+        "main-desc": "通过实时摄像头或照片上传检查您的头发状况！",
+        "btn-webcam": "🎥 实时摄像头",
+        "btn-upload": "📸 上传照片",
+        "upload-title": "选择或拖拽照片",
+        "loading-text": "AI 模型加载中...",
+        "btn-retry": "再试一次",
+        "footer-text": "💡 照片不会被保存，请放心！",
+        "result-title": "分析结果",
+        "Bald": "秃头",
+        "Normal": "头发浓密",
+        "대머리": "秃头",
+        "대머리 아님": "头发浓密"
+    }
+};
+
+function getTranslation(key) {
+    const lang = langSelect.value;
+    return (translations[lang] && translations[lang][key]) ? translations[lang][key] : key;
 }
 
-// Initial theme setup
-if (localStorage.getItem('theme') === 'light') {
-    document.body.classList.add('light-mode');
-    updateThemeColors();
+function updateLanguage(lang) {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang][key]) el.innerHTML = translations[lang][key];
+    });
+    localStorage.setItem('lang', lang);
 }
 
-themeToggle.addEventListener('click', () => {
-    document.body.classList.toggle('light-mode');
-    const isLight = document.body.classList.contains('light-mode');
-    localStorage.setItem('theme', isLight ? 'light' : 'dark');
-    updateThemeColors();
+// --- Theme Management ---
+function initTheme() {
+    const isDark = localStorage.getItem('theme') === 'dark';
+    if (isDark) document.body.classList.add('dark-mode');
+    document.getElementById('theme-icon').textContent = isDark ? '☀️' : '🌙';
+}
+
+document.getElementById('theme-toggle').addEventListener('click', () => {
+    const isDark = document.body.classList.toggle('dark-mode');
+    document.getElementById('theme-icon').textContent = isDark ? '☀️' : '🌙';
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
 });
 
-let playerScore = 0;
-let aiScore = 0;
-let isGameStarted = false;
-let timeLeft = 180;
-let timerInterval;
-
-// High-DPI scaling
-const dpr = window.devicePixelRatio || 1;
-canvas.width = canvas.offsetWidth * dpr;
-canvas.height = canvas.offsetHeight * dpr;
-ctx.scale(dpr, dpr);
-
-// --- ENTITIES ---
-class Paddle {
-  constructor(x, y, radius, color) {
-    this.x = x;
-    this.y = y;
-    this.radius = radius;
-    this.color = color;
-    this.vx = 0;
-    this.vy = 0;
-    this.lastX = x;
-    this.lastY = y;
-  }
-
-  draw() {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-    ctx.fillStyle = this.color;
-    ctx.shadowColor = this.color;
-    ctx.shadowBlur = 15;
-    ctx.fill();
-    ctx.closePath();
-    ctx.shadowBlur = 0; // Reset shadow for other elements
-  }
-
-  update() {
-    this.vx = this.x - this.lastX;
-    this.vy = this.y - this.lastY;
-    this.lastX = this.x;
-    this.lastY = this.y;
-  }
+// --- AI Model Management ---
+async function loadModel() {
+    if (model) return;
+    loadingSection.classList.remove('hidden');
+    try {
+        model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json");
+        maxPredictions = model.getTotalClasses();
+    } catch (e) {
+        alert("모델 로드 실패: " + e.message);
+    }
+    loadingSection.classList.add('hidden');
 }
 
-class Puck {
-  constructor(x, y, radius, color) {
-    this.x = x;
-    this.y = y;
-    this.radius = radius;
-    this.color = color;
-    this.vx = 0;
-    this.vy = 0;
-    this.friction = 0.985;
-  }
+// --- Webcam Functions ---
+async function startWebcam() {
+    await loadModel();
+    isWebcamRunning = true;
+    webcamSection.classList.remove('hidden');
+    uploadSection.classList.add('hidden');
+    resultSection.classList.add('hidden');
 
-  draw() {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-    ctx.fillStyle = this.color;
-    ctx.shadowColor = this.color;
-    ctx.shadowBlur = 10;
-    ctx.fill();
-    ctx.closePath();
-    ctx.shadowBlur = 0;
-  }
-
-  update() {
-    this.x += this.vx;
-    this.y += this.vy;
-    this.vx *= this.friction;
-    this.vy *= this.friction;
-
-    // Minimum speed threshold
-    if (Math.abs(this.vx) < 0.1) this.vx = 0;
-    if (Math.abs(this.vy) < 0.1) this.vy = 0;
-  }
+    if (!webcam) {
+        // [업그레이드] 사용자 제공 로직 반영: flip=true, size=200~300
+        const flip = true;
+        webcam = new tmImage.Webcam(300, 300, flip); 
+        await webcam.setup();
+        await webcam.play();
+        webcamContainer.innerHTML = ''; // 초기화
+        webcamContainer.appendChild(webcam.canvas);
+        window.requestAnimationFrame(webcamLoop);
+    }
 }
 
-// --- INITIALIZATION --
-const rinkWidth = canvas.width / dpr;
-const rinkHeight = canvas.height / dpr;
-
-const player = new Paddle(rinkWidth / 4, rinkHeight / 2, 25, '#0ff');
-const ai = new Paddle((rinkWidth * 3) / 4, rinkHeight / 2, 25, '#f0f');
-const puck = new Puck(rinkWidth / 2, rinkHeight / 2, 15, '#f00');
-const puck2 = new Puck(rinkWidth / 2, rinkHeight / 2, 15, '#f00');
-
-const playerGoalWidth = 80;
-const aiGoalWidth = 80;
-const goalDepth = 15;
-const cornerRadius = 50; // Radius of corner repulsors
-const cornerRepulsion = 3.0; // Repulsion multiplier
-
-// --- PHYSICS & COLLISION ---
-function handleCollisions() {
-    handlePuckCollisions(puck);
-    handlePuckCollisions(puck2);
-
-    // Paddle and Puck
-    handlePaddlePuckCollision(player, puck);
-    handlePaddlePuckCollision(ai, puck);
-    handlePaddlePuckCollision(player, puck2);
-    handlePaddlePuckCollision(ai, puck2);
+async function webcamLoop() {
+    if (!isWebcamRunning) return;
+    webcam.update();
+    const prediction = await model.predict(webcam.canvas);
+    renderBars(prediction, webcamLabelContainer);
+    window.requestAnimationFrame(webcamLoop);
 }
 
-function handlePuckCollisions(puck) {
-    // Corner Repulsors Collision
-    const corners = [
-        { x: 0, y: 0 },
-        { x: rinkWidth, y: 0 },
-        { x: 0, y: rinkHeight },
-        { x: rinkWidth, y: rinkHeight }
-    ];
-
-    corners.forEach(corner => {
-        const dx = puck.x - corner.x;
-        const dy = puck.y - corner.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const minDist = cornerRadius + puck.radius;
-
-        if (dist < minDist) {
-            // Repulsion logic
-            const angle = Math.atan2(dy, dx);
-            const overlap = minDist - dist;
+// --- Upload Functions ---
+async function handleUpload(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    await loadModel();
+    isWebcamRunning = false;
+    webcamSection.classList.add('hidden');
+    loadingSection.classList.remove('hidden');
+    
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        imagePreview.src = e.target.result;
+        imagePreview.onload = async () => {
+            const prediction = await model.predict(imagePreview);
+            prediction.sort((a, b) => b.probability - a.probability);
+            renderBars(prediction, labelContainer);
             
-            // Move puck out of repulsor
-            puck.x += Math.cos(angle) * overlap;
-            puck.y += Math.sin(angle) * overlap;
-
-            // Reflect and boost velocity
-            // Vector from corner to puck is the normal
-            const normalX = dx / dist;
-            const normalY = dy / dist;
+            const top = prediction[0];
+            const translatedClass = getTranslation(top.className);
+            dominantResult.innerHTML = `<strong>[${translatedClass}]</strong><br>${Math.round(top.probability * 100)}%`;
             
-            // Dot product of velocity and normal
-            const dot = puck.vx * normalX + puck.vy * normalY;
-            
-            // Reflect: v = v - 2 * (v . n) * n
-            puck.vx = (puck.vx - 2 * dot * normalX) * cornerRepulsion;
-            puck.vy = (puck.vy - 2 * dot * normalY) * cornerRepulsion;
+            loadingSection.classList.add('hidden');
+            resultSection.classList.remove('hidden');
+            uploadSection.classList.add('hidden');
+        };
+    };
+    reader.readAsDataURL(file);
+}
 
-            // Cap maximum speed to prevent it from going crazy
-            const speed = Math.sqrt(puck.vx * puck.vx + puck.vy * puck.vy);
-            const maxSpeed = 25;
-            if (speed > maxSpeed) {
-                puck.vx = (puck.vx / speed) * maxSpeed;
-                puck.vy = (puck.vy / speed) * maxSpeed;
-            }
-        }
+// --- UI Rendering ---
+function renderBars(predictions, container) {
+    container.innerHTML = '';
+    predictions.forEach(p => {
+        const percent = Math.round(p.probability * 100);
+        const translatedName = getTranslation(p.className);
+        const wrapper = document.createElement('div');
+        wrapper.className = 'result-bar-wrapper';
+        wrapper.innerHTML = `
+            <div class="label-info"><span>${translatedName}</span><span>${percent}%</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width: ${percent}%"></div></div>
+        `;
+        container.appendChild(wrapper);
     });
-
-    // Puck and Walls (standard logic after corner check)
-    if (puck.y - puck.radius < 0) {
-        puck.y = puck.radius;
-        puck.vy *= -0.95;
-    } else if (puck.y + puck.radius > rinkHeight) {
-        puck.y = rinkHeight - puck.radius;
-        puck.vy *= -0.95;
-    }
-
-    if (puck.x - puck.radius < 0 || puck.x + puck.radius > rinkWidth) {
-        // Goal detection
-        if (puck.x < rinkWidth/2) {
-            // Left side (Player's goal)
-            if (puck.y > rinkHeight/2 - playerGoalWidth/2 && puck.y < rinkHeight/2 + playerGoalWidth/2) {
-                aiScore++;
-                aiScoreEl.textContent = aiScore;
-                showGoalNotification();
-                resetPucks();
-            } else {
-                puck.x = puck.radius;
-                puck.vx *= -0.95;
-            }
-        } else {
-            // Right side (AI's goal)
-            if (puck.y > rinkHeight/2 - aiGoalWidth/2 && puck.y < rinkHeight/2 + aiGoalWidth/2) {
-                playerScore++;
-                playerScoreEl.textContent = playerScore;
-                showGoalNotification();
-                resetPucks();
-            } else {
-                puck.x = rinkWidth - puck.radius;
-                puck.vx *= -0.95;
-            }
-        }
-    }
 }
 
-
-function handlePaddlePuckCollision(paddle, puck) {
-    const dx = puck.x - paddle.x;
-    const dy = puck.y - paddle.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-
-    if (distance < paddle.radius + puck.radius) {
-        // Resolve overlap
-        const angle = Math.atan2(dy, dx);
-        const overlap = paddle.radius + puck.radius - distance;
-        puck.x += Math.cos(angle) * overlap;
-        puck.y += Math.sin(angle) * overlap;
-
-        // Collision response
-        const relativeVx = puck.vx - paddle.vx;
-        const relativeVy = puck.vy - paddle.vy;
-        
-        // Add paddle velocity to puck
-        puck.vx = (puck.vx + paddle.vx) * 0.9;
-        puck.vy = (puck.vy + paddle.vy) * 0.9;
-
-        // Ensure minimum impact speed
-        const speed = Math.sqrt(puck.vx * puck.vx + puck.vy * puck.vy);
-        if (speed < 6) {
-            puck.vx = Math.cos(angle) * 8;
-            puck.vy = Math.sin(angle) * 8;
-        }
-    }
-}
-
-// --- AI LOGIC ---
-function updateAI() {
-    const distToPuck1 = Math.sqrt(Math.pow(ai.x - puck.x, 2) + Math.pow(ai.y - puck.y, 2));
-    const distToPuck2 = Math.sqrt(Math.pow(ai.x - puck2.x, 2) + Math.pow(ai.y - puck2.y, 2));
-
-    const targetPuck = distToPuck1 < distToPuck2 ? puck : puck2;
-
-    const targetY = targetPuck.y;
-    // Let the AI patrol its area, moving towards the puck\'s x projection
-    let targetX = (rinkWidth * 3 / 4) + (targetPuck.x - rinkWidth / 2) * 0.3;
-
-    const dx = targetX - ai.x;
-    const dy = targetY - ai.y;
-
-    // Smoothing factor
-    ai.x += dx * 0.12;
-    ai.y += dy * 0.12;
-
-
-    // Keep AI on its side
-    if (ai.x < rinkWidth / 2 + ai.radius) {
-        ai.x = rinkWidth / 2 + ai.radius;
-    }
-    if (ai.x > rinkWidth - ai.radius) {
-        ai.x = rinkWidth - ai.radius;
-    }
-    if (ai.y - ai.radius < 0) {
-        ai.y = ai.radius;
-    }
-    if (ai.y + ai.radius > rinkHeight) {
-        ai.y = rinkHeight - ai.radius;
-    }
-
-    ai.update();
-}
-
-
-// --- GAME LOOP ---
-function gameLoop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-  drawRink();
-  
-  if (isGameStarted) {
-      player.update();
-      puck.update();
-      puck2.update();
-      updateAI();
-      handleCollisions();
-  }
-
-  player.draw();
-  ai.draw();
-  puck.draw();
-  puck2.draw();
-
-  requestAnimationFrame(gameLoop);
-}
-
-// --- DRAWING ---
-function drawRink() {
-    ctx.strokeStyle = rinkLineColor;
-    ctx.lineWidth = 2;
-
-    // Center line
-    ctx.beginPath();
-    ctx.moveTo(rinkWidth / 2, 0);
-    ctx.lineTo(rinkWidth / 2, rinkHeight);
-    ctx.stroke();
-
-    // Center circle
-    ctx.beginPath();
-    ctx.arc(rinkWidth / 2, rinkHeight / 2, 60, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Corner Repulsors
-    ctx.strokeStyle = '#ff0'; // Yellow color for repulsors
-    ctx.lineWidth = 3;
-    const drawCorners = [
-        { x: 0, y: 0 },
-        { x: rinkWidth, y: 0 },
-        { x: 0, y: rinkHeight },
-        { x: rinkWidth, y: rinkHeight }
-    ];
-    drawCorners.forEach(c => {
-        ctx.beginPath();
-        ctx.arc(c.x, c.y, cornerRadius, 0, Math.PI * 2);
-        ctx.stroke();
-        // Add a glow effect
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = '#ff0';
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-    });
-    ctx.strokeStyle = rinkLineColor; // Reset color
-    ctx.lineWidth = 2;
-    
-    // Crease circles
-    ctx.beginPath();
-    ctx.arc(0, rinkHeight / 2, 100, -Math.PI/2, Math.PI/2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(rinkWidth, rinkHeight / 2, 100, Math.PI/2, -Math.PI/2);
-    ctx.stroke();
-
-    // Goals
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = '#0ff';
-    ctx.strokeRect(0, rinkHeight/2 - playerGoalWidth/2, goalDepth, playerGoalWidth);
-    ctx.strokeStyle = '#f0f';
-    ctx.strokeRect(rinkWidth - goalDepth, rinkHeight/2 - aiGoalWidth/2, goalDepth, aiGoalWidth);
-}
-
-// --- HELPERS ---
-function resetPucks() {
-    puck.x = rinkWidth / 2;
-    puck.y = rinkHeight / 2;
-    puck.vx = 0;
-    puck.vy = 0;
-
-    puck2.x = rinkWidth / 2;
-    puck2.y = rinkHeight / 2;
-    puck2.vx = 0;
-    puck2.vy = 0;
-    
-    // Delay start of puck after goal
-    setTimeout(() => {
-        if (isGameStarted) {
-            puck.vx = (Math.random() > 0.5 ? 1 : -1) * 5;
-            puck.vy = (Math.random() * 2 - 1) * 3;
-            puck2.vx = (Math.random() > 0.5 ? 1 : -1) * 5;
-            puck2.vy = (Math.random() * 2 - 1) * 3;
-        }
-    }, 1000);
-}
-
-function showGoalNotification() {
-    goalNotification.classList.remove('hidden');
-    setTimeout(() => {
-        goalNotification.classList.add('hidden');
-    }, 1500);
-}
-
-function startTimer() {
-    clearInterval(timerInterval);
-    timeLeft = 180;
-    timerDisplay.classList.remove('low-time');
-    updateTimerDisplay();
-    timerInterval = setInterval(() => {
-        if (isGameStarted) {
-            timeLeft--;
-            updateTimerDisplay();
-            
-            if (timeLeft <= 10) {
-                timerDisplay.classList.add('low-time');
-            }
-            
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                let resultMessage = "";
-                if (playerScore > aiScore) {
-                    resultMessage = `You Win! ${playerScore} - ${aiScore}`;
-                } else if (aiScore > playerScore) {
-                    resultMessage = `AI Wins! ${aiScore} - ${playerScore}`;
-                } else {
-                    resultMessage = `It's a Draw! ${playerScore} - ${aiScore}`;
-                }
-                endGame(resultMessage);
-            }
-        }
-    }, 1000);
-}
-
-function updateTimerDisplay() {
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
-
-function endGame(message) {
-    isGameStarted = false;
-    clearInterval(timerInterval);
-    gameOverMessage.textContent = message;
-    gameOverOverlay.classList.remove('hidden');
-}
-
-function restartGame() {
-    playerScore = 0;
-    aiScore = 0;
-    playerScoreEl.textContent = playerScore;
-    aiScoreEl.textContent = aiScore;
-    gameOverOverlay.classList.add('hidden');
-    isGameStarted = true;
-    startTimer();
-    resetPucks();
-}
-
-// --- CONTROL ---
-function handleInput(x, y) {
-    if (!isGameStarted) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / dpr / rect.width;
-    const scaleY = canvas.height / dpr / rect.height;
-
-    let mouseX = (x - rect.left) * scaleX;
-    let mouseY = (y - rect.top) * scaleY;
-    
-    // Keep player on their side
-    if (mouseX < player.radius) {
-        mouseX = player.radius;
-    }
-    if (mouseY < player.radius) {
-        mouseY = player.radius;
-    }
-    if (mouseY > rinkHeight - player.radius) {
-        mouseY = rinkHeight - player.radius;
-    }
-
-    player.x = mouseX;
-    player.y = mouseY;
-}
-
-canvas.addEventListener('mousemove', (e) => handleInput(e.clientX, e.clientY));
-canvas.addEventListener('touchmove', (e) => {
-    e.preventDefault();
-    handleInput(e.touches[0].clientX, e.touches[0].clientY);
-}, { passive: false });
-
-startButton.addEventListener('click', () => {
-    isGameStarted = true;
-    startOverlay.classList.add('hidden');
-    startTimer();
-    resetPucks();
+// --- Event Listeners ---
+useWebcamBtn.addEventListener('click', startWebcam);
+useUploadBtn.addEventListener('click', () => {
+    isWebcamRunning = false;
+    webcamSection.classList.add('hidden');
+    uploadSection.classList.remove('hidden');
+    resultSection.classList.add('hidden');
 });
 
-restartButton.addEventListener('click', restartGame);
+imageUpload.addEventListener('change', (e) => handleUpload(e.target.files[0]));
+retryBtn.addEventListener('click', () => {
+    resultSection.classList.add('hidden');
+    uploadSection.classList.remove('hidden');
+});
 
-// --- START GAME LOOP ---
-gameLoop();
+langSelect.addEventListener('change', (e) => updateLanguage(e.target.value));
+
+// --- Initialization ---
+initTheme();
+const savedLang = localStorage.getItem('lang') || 'ko';
+langSelect.value = savedLang;
+updateLanguage(savedLang);
