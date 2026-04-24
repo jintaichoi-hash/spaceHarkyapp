@@ -135,7 +135,7 @@ class Puck {
     this.color = color;
     this.vx = 0;
     this.vy = 0;
-    this.friction = 0.99;
+    this.friction = 0.97;
     this.trail = [];
     this.maxTrail = 12;
   }
@@ -235,7 +235,7 @@ function handleCollisions() {
                 puck.vx = (puck.vx - 2 * dot * nx) * cornerRepulsion;
                 puck.vy = (puck.vy - 2 * dot * ny) * cornerRepulsion;
                 const speed = Math.sqrt(puck.vx * puck.vx + puck.vy * puck.vy);
-                const maxSpeed = 35;
+                const maxSpeed = 15;
                 if (speed > maxSpeed) {
                     puck.vx = (puck.vx / speed) * maxSpeed;
                     puck.vy = (puck.vy / speed) * maxSpeed;
@@ -351,8 +351,8 @@ function handlePaddlePuckCollision(paddle, puck) {
             const restitution = 0.8;
             puck.vx -= (1 + restitution) * dot * normalX;
             puck.vy -= (1 + restitution) * dot * normalY;
-            puck.vx += paddle.vx * 0.5;
-            puck.vy += paddle.vy * 0.5;
+            puck.vx += paddle.vx * 0.3;
+            puck.vy += paddle.vy * 0.3;
             
             // Haptic on collision
             if (paddle === player && navigator.vibrate) {
@@ -362,7 +362,7 @@ function handlePaddlePuckCollision(paddle, puck) {
         }
 
         const speed = Math.sqrt(puck.vx * puck.vx + puck.vy * puck.vy);
-        const maxSpeed = 15;
+        const maxSpeed = 8;
         if (speed > maxSpeed) {
             puck.vx = (puck.vx / speed) * maxSpeed;
             puck.vy = (puck.vy / speed) * maxSpeed;
@@ -588,8 +588,8 @@ function resetPositions() {
     player.reset();
     ai.reset();
     pucks.forEach(p => {
-        p.vx = (Math.random() > 0.5 ? 1 : -1) * 3;
-        p.vy = (Math.random() - 0.5) * 4;
+        p.vx = (Math.random() > 0.5 ? 1 : -1) * 1.5;
+        p.vy = (Math.random() - 0.5) * 2;
     });
 }
 
