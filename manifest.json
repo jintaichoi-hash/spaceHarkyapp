@@ -1,0 +1,21 @@
+{
+  "name": "Harky Hockey - Pro Edition",
+  "short_name": "Harky Hockey",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#050508",
+  "theme_color": "#00f2ff",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "https://cdn.pixabay.com/photo/2013/07/13/12/34/hockey-159871_1280.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn.pixabay.com/photo/2013/07/13/12/34/hockey-159871_1280.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

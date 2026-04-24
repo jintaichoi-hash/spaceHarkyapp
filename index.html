@@ -1,136 +1,145 @@
-<!DOCTYPE html>
-<html lang="ko">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 대머리 관상 분석 PRO - 실시간 무료 테스트</title>
-    <meta name="description" content="인공지능(AI)이 분석하는 정밀 대머리 관상 테스트. 실시간 웹캠과 사진 업로드로 나의 풍성함을 확인해보세요. 무료 분석 및 관리 팁 제공.">
-    <meta name="keywords" content="대머리 테스트, 관상 테스트, AI 분석, 탈모 테스트, 무료 관상, 실시간 웹캠 테스트">
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8179129753758760" crossorigin="anonymous"></script>
-    <meta name="google-adsense-account" content="ca-pub-8179129753758760">
-    
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
-    
-    <!-- Google AdSense (본인의 코드로 교체 필요) -->
-    <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Harky Hockey - Pro Edition</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#050508">
+  <link rel="manifest" href="manifest.json">
+  <meta name="google-adsense-account" content="ca-pub-8179129753758760">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8179129753758760"
+     crossorigin="anonymous"></script>
+  <link href='style.css' rel='stylesheet'>
 </head>
 <body>
-    <!-- 상단 네비게이션 (애드센스 승인 필수 요소) -->
-    <nav class="main-nav">
-        <div class="nav-container">
-            <div class="nav-logo">🧑‍🦲 AI BoldTest</div>
-            <ul class="nav-menu">
-                <li><a href="#home" data-i18n="nav-home">홈</a></li>
-                <li><a href="#test" data-i18n="nav-test">테스트</a></li>
-                <li><a href="#info" data-i18n="nav-info">정보</a></li>
-                <li><a href="#privacy" data-i18n="nav-privacy">개인정보</a></li>
-            </ul>
-        </div>
-    </nav>
-
-    <!-- 언어 및 테마 토글 -->
-    <div class="top-controls">
-        <select id="lang-select">
-            <option value="ko">🇰🇷 한국어</option>
-            <option value="en">🇺🇸 English</option>
-            <option value="ja">🇯🇵 日本語</option>
-            <option value="zh">🇨🇳 简体中文</option>
-        </select>
-        <button id="theme-toggle" class="theme-toggle-btn">
-            <span id="theme-icon">🌙</span>
-        </button>
+  <header>
+    <div class="header-container">
+      <h1>Harky Hockey</h1>
+      <nav>
+        <a href="#game-section">Play</a>
+        <a href="#how-to-play">How to Play</a>
+        <a href="#about">About</a>
+        <button id="theme-toggle">LIGHT MODE</button>
+      </nav>
     </div>
+  </header>
 
-    <div class="app-container" id="home">
-        <!-- 상단 광고 영역 1 -->
-        <div class="ad-slot top-ad">
-            <p style="font-size: 10px; color: #ccc;">ADVERTISEMENT</p>
-            <!-- [광고 삽입 위치] -->
+  <main>
+    <section id="game-section">
+      <div id="game-container">
+        <div id="start-overlay" class="overlay">
+          <h1>ICE HOCKEY</h1>
+          <button id="start-button">START GAME</button>
         </div>
-
-        <header class="app-header">
-            <h1 data-i18n="main-title">🧑‍🦲 대머리 관상 분석 PRO 👨‍🦱</h1>
-            <p data-i18n="main-desc">AI가 당신의 두피 관상을 분석하여 미래를 예측해 드립니다.</p>
-        </header>
-
-        <main class="app-main" id="test">
-            <div class="mode-selection">
-                <button id="use-webcam-btn" class="mode-btn" data-i18n="btn-webcam">🎥 실시간 웹캠</button>
-                <button id="use-upload-btn" class="mode-btn" style="background-color: var(--accent-color);" data-i18n="btn-upload">📸 사진 업로드</button>
-            </div>
-
-            <!-- 웹캠 섹션 -->
-            <section id="webcam-section" class="hidden">
-                <div id="webcam-container" class="image-preview-box"></div>
-                <div class="prediction-results">
-                    <div id="webcam-label-container" class="bars-container"></div>
-                </div>
-            </section>
-
-            <!-- 업로드 섹션 -->
-            <section class="upload-section hidden" id="upload-section">
-                <div class="upload-box" id="drop-area">
-                    <input type="file" id="image-upload" accept="image/*" class="file-input" style="display:none;">
-                    <label for="image-upload" style="cursor:pointer;">
-                        <div style="font-size: 3rem; margin-bottom: 10px;">👵</div>
-                        <h3 data-i18n="upload-title">사진 선택 또는 드래그</h3>
-                    </label>
-                </div>
-            </section>
-
-            <!-- 로딩 화면 -->
-            <section class="loading-section hidden" id="loading-section">
-                <div class="spinner"></div>
-                <p id="loading-text" data-i18n="loading-text">관상 분석 모델 가동 중...</p>
-            </section>
-
-            <!-- 결과 화면 -->
-            <section class="result-section hidden" id="result-section">
-                <div class="image-preview-box">
-                    <img id="image-preview" src="" alt="Preview">
-                </div>
-                <div class="prediction-results">
-                    <h2 id="dominant-result" data-i18n="result-title">분석 결과</h2>
-                    <div id="label-container" class="bars-container"></div>
-                </div>
-                <button type="button" class="retry-btn" id="retry-btn" data-i18n="btn-retry">다시 하기</button>
-            </section>
-        </main>
-
-        <!-- 중단 광고 영역 2 -->
-        <div class="ad-slot mid-ad">
-            <!-- [광고 삽입 위치] -->
+        <div id="game-over-overlay" class="overlay hidden">
+          <h1 id="game-over-message"></h1>
+          <button id="restart-button">RESTART</button>
         </div>
+        <div class="scoreboard">
+          <div id="player-score">0</div>
+          <div class="score-divider">:</div>
+          <div id="ai-score">0</div>
+        </div>
+        <div id="timer-display">02:00</div>
+        <div id="goal-notification" class="hidden">GOAL!</div>
+        <canvas id="game-canvas"></canvas>
+      </div>
+    </section>
 
-        <!-- SEO용 콘텐츠 섹션 (애드센스 승인을 위한 텍스트 콘텐츠) -->
-        <section class="info-content" id="info">
-            <h2 data-i18n="info-title">관상학으로 보는 대머리</h2>
-            <p data-i18n="info-p1">관상학에서 이마는 하늘의 기운을 받는 곳으로, 넓고 빛나는 이마는 대개 총명함과 리더십을 상징합니다. 본 테스트는 AI 기술을 통해 이러한 전통적 관상 해석과 현대적 데이터를 결합하여 재미있는 결과를 제공합니다.</p>
-            <h3 data-i18n="info-h3">풍성한 기운을 유지하는 법</h3>
-            <ul data-i18n="info-list">
-                <li>규칙적인 두피 마사지로 혈액순환 돕기</li>
-                <li>단백질이 풍부한 식단 유지</li>
-                <li>스트레스 관리와 충분한 수면</li>
-            </ul>
-        </section>
+    <section id="how-to-play" class="content-section">
+      <h2>How to Play</h2>
+      <div class="content-grid">
+        <div class="content-card">
+          <h3>Controls</h3>
+          <p>Use your <strong>mouse</strong> or <strong>touch</strong> to move your paddle. You can only move on your side of the rink.</p>
+        </div>
+        <div class="content-card">
+          <h3>Objective</h3>
+          <p>Score <strong>5 goals</strong> before the AI or before the timer runs out! Hit the puck with your paddle to send it toward the opponent's goal.</p>
+        </div>
+        <div class="content-card">
+          <h3>Rules</h3>
+          <p>The game lasts for 3 minutes. If time runs out and you haven't scored 5 goals, the AI wins. Good luck!</p>
+        </div>
+      </div>
+    </section>
 
-        <!-- 개인정보처리방침 (애드센스 필수 요소) -->
-        <section class="privacy-section" id="privacy">
-            <h2 data-i18n="nav-privacy">개인정보처리방침</h2>
-            <p data-i18n="privacy-text">본 사이트는 사용자의 카메라 및 사진 데이터를 분석 목적으로만 사용하며, 어떠한 서버에도 저장하거나 외부에 공유하지 않습니다. 모든 분석은 사용자의 브라우저 내에서 로컬로 이루어집니다.</p>
-        </section>
-        
-        <footer class="app-footer">
-            <p>&copy; 2024 AI BoldTest PRO. All rights reserved.</p>
-        </footer>
+    <section id="about" class="content-section">
+      <h2>About Harky Hockey</h2>
+      <p>Harky Hockey is a fast-paced, arcade-style ice hockey game built with modern web technologies. Our goal is to provide a smooth, responsive, and fun gaming experience directly in your browser without any downloads required.</p>
+      <p>Whether you're looking for a quick break or a challenging match against our AI, Harky Hockey offers an engaging way to test your reflexes and strategy.</p>
+    </section>
+
+    <section id="policy" class="content-section">
+      <h2>Policies</h2>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('privacy')">Privacy Policy</button>
+        <button class="tab-btn" onclick="showTab('terms')">Terms of Service</button>
+      </div>
+      <div id="privacy" class="tab-content active">
+        <h3>Privacy Policy</h3>
+        <p>At Harky Hockey, we value your privacy. This policy explains how we handle your data:</p>
+        <ul>
+          <li><strong>Information Collection:</strong> We do not collect any personal identification information (PII) from our users.</li>
+          <li><strong>Cookies:</strong> We use local storage to remember your theme preference (Dark/Light mode). We do not use tracking cookies for personal profiling.</li>
+          <li><strong>Third-party Services:</strong> We use Google AdSense to serve ads. Google may use cookies to serve ads based on your prior visits to this or other websites.</li>
+        </ul>
+      </div>
+      <div id="terms" class="tab-content">
+        <h3>Terms of Service</h3>
+        <p>By using Harky Hockey, you agree to the following terms:</p>
+        <ul>
+          <li><strong>Usage:</strong> This game is for personal, non-commercial use only.</li>
+          <li><strong>Disclaimer:</strong> The game is provided "as is" without any warranties. We are not responsible for any data loss or issues arising from use.</li>
+          <li><strong>Modifications:</strong> We reserve the right to update the game or these terms at any time.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- AdSense Display Ad Section -->
+    <section id="ads-section" style="text-align: center; margin: 4rem 0;">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-8179129753758760"
+           data-ad-slot="auto"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>
+           (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-container">
+      <p>&copy; 2026 Harky Hockey. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#privacy">Privacy</a>
+        <a href="#terms">Terms</a>
+      </div>
     </div>
+  </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-    <script type="module" src="main.js"></script>
+  <script>
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+  </script>
+  <script defer type="text/javascript" src="main.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW registered!', reg))
+          .catch(err => console.log('SW reg failed!', err));
+      });
+    }
+  </script>
 </body>
 </html>
