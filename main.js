@@ -235,7 +235,7 @@ function handleCollisions() {
                 puck.vx = (puck.vx - 2 * dot * nx) * cornerRepulsion;
                 puck.vy = (puck.vy - 2 * dot * ny) * cornerRepulsion;
                 const speed = Math.sqrt(puck.vx * puck.vx + puck.vy * puck.vy);
-                const maxSpeed = 15;
+                const maxSpeed = 6;
                 if (speed > maxSpeed) {
                     puck.vx = (puck.vx / speed) * maxSpeed;
                     puck.vy = (puck.vy / speed) * maxSpeed;
@@ -245,10 +245,10 @@ function handleCollisions() {
 
         if (puck.y - puck.radius < 0) {
             puck.y = puck.radius;
-            puck.vy *= -1.5;
+            puck.vy *= -1.1; // Reduced from -1.5
         } else if (puck.y + puck.radius > rinkHeight) {
             puck.y = rinkHeight - puck.radius;
-            puck.vy *= -1.5;
+            puck.vy *= -1.1; // Reduced from -1.5
         }
 
         if (puck.x - puck.radius < 0) {
@@ -256,14 +256,14 @@ function handleCollisions() {
                 scoreGoal('player');
             } else {
                 puck.x = puck.radius;
-                puck.vx *= -1.5;
+                puck.vx *= -1.1; // Reduced from -1.5
             }
         } else if (puck.x + puck.radius > rinkWidth) {
             if (puck.y > rinkHeight / 2 - goalWidth / 2 && puck.y < rinkHeight / 2 + goalWidth / 2) {
                 scoreGoal('ai');
             } else {
                 puck.x = rinkWidth - puck.radius;
-                puck.vx *= -1.5;
+                puck.vx *= -1.1; // Reduced from -1.5
             }
         }
 
@@ -348,11 +348,11 @@ function handlePaddlePuckCollision(paddle, puck) {
         const dot = relVx * normalX + relVy * normalY;
 
         if (dot < 0) {
-            const restitution = 0.8;
+            const restitution = 0.5; // Reduced from 0.8
             puck.vx -= (1 + restitution) * dot * normalX;
             puck.vy -= (1 + restitution) * dot * normalY;
-            puck.vx += paddle.vx * 0.3;
-            puck.vy += paddle.vy * 0.3;
+            puck.vx += paddle.vx * 0.1; // Reduced from 0.3
+            puck.vy += paddle.vy * 0.1; // Reduced from 0.3
             
             // Haptic on collision
             if (paddle === player && navigator.vibrate) {
@@ -362,7 +362,7 @@ function handlePaddlePuckCollision(paddle, puck) {
         }
 
         const speed = Math.sqrt(puck.vx * puck.vx + puck.vy * puck.vy);
-        const maxSpeed = 8;
+        const maxSpeed = 4; // Reduced from 8
         if (speed > maxSpeed) {
             puck.vx = (puck.vx / speed) * maxSpeed;
             puck.vy = (puck.vy / speed) * maxSpeed;
