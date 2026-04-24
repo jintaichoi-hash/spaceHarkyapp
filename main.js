@@ -57,10 +57,14 @@ let timerInterval;
 const WINNING_SCORE = 5;
 
 const dpr = window.devicePixelRatio || 1;
+let rinkWidth, rinkHeight;
+
 function resizeCanvas() {
     canvas.width = canvas.offsetWidth * dpr;
     canvas.height = canvas.offsetHeight * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    rinkWidth = canvas.width / dpr;
+    rinkHeight = canvas.height / dpr;
 }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
@@ -192,9 +196,6 @@ class Puck {
     this.trail = [];
   }
 }
-
-const rinkWidth = canvas.width / dpr;
-const rinkHeight = canvas.height / dpr;
 
 // REVERSED SIDES: Player is Right (Pink), AI is Left (Cyan)
 const player = new Paddle(rinkWidth - 60, rinkHeight / 2, 25, '#ff00ff');
@@ -632,6 +633,8 @@ function endGame(message) {
 }
 
 function restartGame() {
+    document.body.classList.add('focus-mode');
+    resizeCanvas();
     playerScore = 0;
     aiScore = 0;
     playerScoreEl.textContent = playerScore;
@@ -645,16 +648,19 @@ function restartGame() {
 function handleInput(x, y) {
     if (!isGameStarted) return;
     const rect = canvas.getBoundingClientRect();
-    const scaleX = rinkWidth / rect.width;
-    const scaleY = rinkHeight / rect.height;
+    const scaleX = (canvas.width / dpr) / rect.width;
+    const scaleY = (canvas.height / dpr) / rect.height;
     let mouseX = (x - rect.left) * scaleX;
     let mouseY = (y - rect.top) * scaleY;
     
+    const currentRinkWidth = canvas.width / dpr;
+    const currentRinkHeight = canvas.height / dpr;
+
     // ALLOW PLAYER TO MOVE ACROSS ENTIRE RINK
     if (mouseX < player.radius) mouseX = player.radius;
-    if (mouseX > rinkWidth - player.radius) mouseX = rinkWidth - player.radius;
+    if (mouseX > currentRinkWidth - player.radius) mouseX = currentRinkWidth - player.radius;
     if (mouseY < player.radius) mouseY = player.radius;
-    if (mouseY > rinkHeight - player.radius) mouseY = rinkHeight - player.radius;
+    if (mouseY > currentRinkHeight - player.radius) mouseY = currentRinkHeight - player.radius;
     
     player.x = mouseX;
     player.y = mouseY;
@@ -667,6 +673,8 @@ canvas.addEventListener('touchmove', (e) => {
 }, { passive: false });
 
 startButton.addEventListener('click', () => {
+    document.body.classList.add('focus-mode');
+    resizeCanvas();
     isGameStarted = true;
     startOverlay.classList.add('hidden');
     resetPositions();
